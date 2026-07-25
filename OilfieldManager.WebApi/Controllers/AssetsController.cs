@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OilfieldManager.Application.DTOs;
 using OilfieldManager.Domain.Entities;
 using OilfieldManager.Infrastructure.Data;
 
@@ -16,16 +17,39 @@ public class AssetsController : ControllerBase
         _context = context;
     }
 
+    // 1. Fetches ALL assets (Matches: GET /api/assets)
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Asset>>> GetAssets()
     {
-        return await _context.Assets.Include(a => a.CurrentWell).ToListAsync();
+        var assets = await _context.Assets.Include(a => a.CurrentWell).ToListAsync();
+
+        // Flatten the data into DTOs to strip out the recursive loop
+        var assetDtos = assets.Select(a => new AssetDto
+        {
+            Id = a.Id,
+            SerialNumber = a.SerialNumber,
+            Model = a.Model,
+            Status = a.Status.ToString(),
+            WellId = a.CurrentWellId,
+            WellName = a.CurrentWell?.WellName
+        });
+
+        return Ok(assetDtos);
     }
 
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<Asset>>> GetAsset()
+    // 2. Fetches a SINGLE asset (Matches: GET /api/assets/guid-goes-here)
+    [HttpGet("{id}")] // <-- Make sure "{id}" is explicitly added here!
+    public async Task<ActionResult<Asset>> GetAsset(Guid id)
     {
-        return await _context.Assets.Include(a => a.CurrentWell).ToListAsync();
+        var asset = await _context.Assets.Include(a => a.CurrentWell)
+                                         .FirstOrDefaultAsync(a => a.Id == id);
+
+        if (asset == null)
+        {
+            return NotFound();
+        }
+
+        return asset;
     }
 
     [HttpPost]

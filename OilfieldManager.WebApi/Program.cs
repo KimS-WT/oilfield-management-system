@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using OilfieldManager.Infrastructure.Data;
 
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // 1. Configure SQLite Database Connection
@@ -35,5 +37,21 @@ app.UseHttpsRedirection();
 app.UseCors("ReactPolicy");
 app.UseAuthorization();
 app.MapControllers();
+
+// scoping block to execute DbInitializer script
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<OilfieldDbContext>();
+        await DbInitializer.SeedAsync(context);
+        Console.WriteLine("--> Database seeding completed successfully!");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"--> An error occurred while seeding the database: {ex.Message}");
+    }
+}
 
 app.Run();
