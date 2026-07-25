@@ -22,17 +22,10 @@ public class AssetsController : ControllerBase
         return await _context.Assets.Include(a => a.CurrentWell).ToListAsync();
     }
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Asset>> GetAsset(Guid id)
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<Asset>>> GetAsset()
     {
-        var asset = await _context.Assets.Include(a => a.CurrentWell).FirstOrDefaultAsync(a => a.Id == id);
-
-        if (asset == null)
-        {
-            return NotFound();
-        }
-
-        return asset;
+        return await _context.Assets.Include(a => a.CurrentWell).ToListAsync();
     }
 
     [HttpPost]
