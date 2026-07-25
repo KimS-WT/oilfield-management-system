@@ -507,3 +507,23 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# React temporary dependency files
+oilfieldmanager-ui/node_modules/
+oilfieldmanager-ui/dist/
+
+# --- Frontend (React / Node) ---
+**/node_modules/
+**/dist/
+.env.local
+
+# --- Backend (.NET / Core) ---
+**/bin/
+**/obj/
+*.user
+*.suo
+.vs/
+
+# --- Database ---
+**/*.db
+**/*.db-journal
